@@ -1,12 +1,15 @@
 
 using Microsoft.AspNetCore.Builder;
+using ToDoList.DataAccess;
+using ToDoList.Models;
+using ToDoList.Services;
 
 namespace ToDoList
 {
     public class Program
     {
         // Define the database as a static member
-        private static readonly InMemoryToDoDatabase _database = new();
+        private static readonly IToDoDatabase _database = new InMemoryToDoDatabaseDict();
 
         public static void Main(string[] args)
         {
