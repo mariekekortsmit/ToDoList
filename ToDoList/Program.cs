@@ -1,22 +1,23 @@
 
 using Microsoft.AspNetCore.Builder;
-using ToDoList.DataAccess;
-using ToDoList.Models;
-using ToDoList.Services;
+using ToDoList.DataAccess.Implementations;
+using ToDoList.DataAccess.Interfaces;
+using ToDoList.Models.Dtos;
 
 namespace ToDoList
 {
     public class Program
     {
-        // Define the database as a static member
-        private static readonly IToDoDatabase _database = new InMemoryToDoDatabaseDict();
-
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddAuthorization();
+
+            // Register the InMemoryToDoDatabaseDict with DI container.
+            // If you want to use a different database, register it here.
+            builder.Services.AddSingleton<IToDoDatabase, InMemoryToDoDatabaseDict>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -35,12 +36,13 @@ namespace ToDoList
 
             app.UseAuthorization();
 
-            // Directly use the static _database member
-            app.MapGet("/todos/{id}", (int id) => _database.Get(id));
-            app.MapGet("/todos", () => _database.GetAll());
-            app.MapPost("/todos", (AddItemDto item) => _database.Add(item));
-            app.MapPut("/todos/{id}", (int id,  UpdateItemDto item) => _database.Update(id, item));
-            app.MapDelete("/todos/{id}", (int id) => _database.Delete(id));
+            // Use the injected IToDoDatabase service
+            app.MapGet("/todos/{id}", (Guid id, IToDoDatabase database) => database.Get(id));
+            app.MapGet("/todos", (IToDoDatabase database) => database.GetAll());
+            app.MapPost("/todos", (AddItemDto item, IToDoDatabase database) => database.Add(item));
+            app.MapPut("/todos/{id}", (Guid id, UpdateItemDto item, IToDoDatabase database) => database.Update(id, item));
+            app.MapDelete("/todos/{id}", (Guid id, IToDoDatabase database) => database.Delete(id));
+
 
             app.Run();
         }

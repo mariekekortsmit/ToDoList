@@ -1,4 +1,4 @@
-﻿namespace ToDoList.Models
+﻿namespace ToDoList.Models.Dtos
 {
     public class UpdateItemDto
     {

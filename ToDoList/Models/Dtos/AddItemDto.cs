@@ -1,8 +1,7 @@
-﻿namespace ToDoList.Models
+﻿namespace ToDoList.Models.Dtos
 {
-    public class ToDoItemDto
+    public class AddItemDto
     {
-        public int Id { get; set; }
         public string Task { get; set; } = string.Empty;
         public bool IsCompleted { get; set; }
     }

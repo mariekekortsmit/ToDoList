@@ -1,17 +1,80 @@
 # ToDoList
 
-Repository for learning C# by working through a ToDoList application in C#.
+Repository for learning C# by working through a ToDoList application in C#. First, write a simple todo-application as console application. Next do a rest API. Then build it up step by step according to the assignments.
 
-## To do list
+## History of assignments and related notes
 
-To be filled during next coaching meeting.
+1.  Replace all foreach loops with LINQ:
 
-## History of to do list and related notes
+    Current implementation uses `FirstOrDefault` as follows:
+    ```csharp
+        public bool Update(int id, UpdateItemDto item)
+        {
+            var itemToUpdate = _items.FirstOrDefault(item => item.Id == id);
+            if (itemToUpdate != null)
+            {
+                if (item.Task != null)
+                {
+                    itemToUpdate.Task = item.Task;
+                }
+                if (item.IsCompleted.HasValue)
+                {
+                    itemToUpdate.IsCompleted = item.IsCompleted.Value;
+                }
+                return true;
+            }
+            return false;
+        }
+    ```
+    To use `First` instead of `FirstOrDefault`: `First` throws an exception if no item is found that matches the condition. If you expect that an item with the given id may not exist, it's generally safer to use `FirstOrDefault`. However, if you are sure that the item will exist and you want to use `First`, you should wrap it in a try-catch block to handle the potential `InvalidOperationException`. Using `FirstOrDefault` is the correct approach when the presence of the item isn't guaranteed. It avoids the unnecessary cost of exception handling which should not be used for normal control flow in your programs.
 
-1. Replace all foreach loops with LINQ;
-    - Question: For the Update and Get(id) functions, what to use? First? FirstOrDefault? SingleOrDefault? Where could give multiple entries so is less efficient as it will keep on looking after you've found one, and in our setup there should only be 1 item with this specific id.  
+    Here's how you might use  `First`:
+    ```csharp
+    public bool Update(int id, UpdateItemDto item)
+    {
+        try
+        {
+            // Find the first item that matches the ID or throw an exception if none found.
+            var itemToUpdate = _items.First(i => i.Id == id);
+            
+            if (item.Task != null)
+            {
+                itemToUpdate.Task = item.Task;
+            }
+            if (item.IsCompleted.HasValue)
+            {
+                itemToUpdate.IsCompleted = item.IsCompleted.Value;
+            }
+
+            // If we've reached here, the item has been successfully updated.
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            // If an exception was caught, it means no item matched the ID.
+            return false;
+        }
+    }
+    ```
 2. Replace the inmemory database with an interface;
 3. Add a seperate implementation for the database that uses a dictionary instead of a list.
-    - Question: Is the place where I decide on which one to use in Program.cs? That means if I want to use the other one I need to change the code. That doesn't seem ideal.
 4. Split out classes and files in different folders.
-    - Question: Folders are now called DataAccess (for the data interface), Models (for the data models), Services (for the database implementations). What is a typical naming?
+
+[TODISCUSS:]
+
+5. Update the code to handle concurrent updates. Assume 2 people are creating a new todo item at the same time. What to do with the ids? Think of the solution as multiple backends running against a central database. The database will then handle the concurrency. How to solve it here? 
+
+    I found several solutions: 
+    - `int newId = Interlocked.Increment(ref _nextId);`
+    - `Id = Guid.NewGuid(),`
+    - `lock (_lock) {}`
+    
+    which are complimentary in the sense that you can choose either `Guid` or `Interlocked.Increment` because they are both guaranteeing a unique Id. But additionally to control access to the "database" itself you need some kind of `lock` pattern.
+6. Dependency inject which database to use.
+
+    Now I still need to change a line of code in Program.cs when I want to change which database to use. Is it really that useful in this implementation? Or its just futureproofing?
+
+[TODO]
+
+7. Stretch: Implement the Mediator Pattern. Look for inspiration in the existing code base.
+8. Unit tests.

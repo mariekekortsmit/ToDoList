@@ -1,8 +1,10 @@
-﻿namespace ToDoList.Models
+﻿using ToDoList.Models.Dtos;
+
+namespace ToDoList.Models.Entities
 {
     public class ToDoItem
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Task { get; set; } = string.Empty;
         public bool IsCompleted { get; set; }
 
