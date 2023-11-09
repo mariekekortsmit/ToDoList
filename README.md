@@ -59,9 +59,6 @@ Repository for learning C# by working through a ToDoList application in C#. Firs
 2. Replace the inmemory database with an interface;
 3. Add a seperate implementation for the database that uses a dictionary instead of a list.
 4. Split out classes and files in different folders.
-
-[TODISCUSS:]
-
 5. Update the code to handle concurrent updates. Assume 2 people are creating a new todo item at the same time. What to do with the ids? Think of the solution as multiple backends running against a central database. The database will then handle the concurrency. How to solve it here? 
 
     I found several solutions: 
@@ -70,11 +67,27 @@ Repository for learning C# by working through a ToDoList application in C#. Firs
     - `lock (_lock) {}`
     
     which are complimentary in the sense that you can choose either `Guid` or `Interlocked.Increment` because they are both guaranteeing a unique Id. But additionally to control access to the "database" itself you need some kind of `lock` pattern.
+    Whereas my first implementation included the lock in the form of"
+    ```csharp
+    private readonly object _lock = new();
+    lock (_lock)
+    {
+        code to be locked
+    }
+    ``` 
+    You don't need a new object `_lock` for this as you can just use `lock(this)` instead.
 6. Dependency inject which database to use.
+ 
 
-    Now I still need to change a line of code in Program.cs when I want to change which database to use. Is it really that useful in this implementation? Or its just futureproofing?
-
-[TODO]
+[TODISCUSS:]
 
 7. Stretch: Implement the Mediator Pattern. Look for inspiration in the existing code base.
+Mediatr.
+Request handler
+Queries/Commands: read/update
+
 8. Unit tests.
+9. making sure that the interface down to the database is async.
+--
+Later:
+look at async/await.

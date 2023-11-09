@@ -5,10 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using ToDoList.DataAccess.Implementations;
 using ToDoList.DataAccess.Interfaces;
-using ToDoList.Features.Todos.Queries;
+//using ToDos.Queries.Requests;
 using ToDoList.Models.Dtos;
 using ToDoList;
-
+using ToDoList.ToDos.Queries.Requests;
+using ToDoList.ToDos.Commands.Requests;
+using ToDoList.Models.Entities;
 
 namespace ToDoList
 {
@@ -50,10 +52,9 @@ namespace ToDoList
                .WithTags("todos")               ;
 
             // Use the injected IToDoDatabase service
-            app.MapGet("/todos/{id}", (Guid id, IToDoDatabase database) => database.Get(id));
-            //app.MapGet("/todos", (IToDoDatabase database) => database.GetAll());\
-            group.MapGet<GetAllToDoItemsQuery, List<ToDoItemDto>>("/");
-            app.MapPost("/todos", (AddItemDto item, IToDoDatabase database) => database.Add(item));
+            group.MapGet<GetToDoItemById, ToDoItemDto?>("/{Id}/");
+            group.MapGet<GetToDoItems, List<ToDoItemDto>>("/");
+            group.MapPost<AddToDo, ToDoItem>("/");
             app.MapPut("/todos/{id}", (Guid id, UpdateItemDto item, IToDoDatabase database) => database.Update(id, item));
             app.MapDelete("/todos/{id}", (Guid id, IToDoDatabase database) => database.Delete(id));
 

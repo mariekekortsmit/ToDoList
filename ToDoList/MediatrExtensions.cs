@@ -14,5 +14,12 @@ namespace ToDoList
                 async (IMediator mediator, [AsParameters] TRequest request) => await mediator.Send(request));
         }
 
+        public static RouteHandlerBuilder MapPost<TRequest, TResponse>(this IEndpointRouteBuilder app, string template)
+           where TRequest : IRequest<TResponse>
+        {
+            return app.MapPost(template,
+                async (IMediator mediator, [AsParameters] TRequest request) => await mediator.Send(request));
+        }
+
     }
 }
