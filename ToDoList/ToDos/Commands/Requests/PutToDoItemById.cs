@@ -5,14 +5,17 @@ using ToDoList.Models.Entities;
 
 namespace ToDoList.ToDos.Commands.Requests
 {
-    public class AddToDo : IRequest<ToDoItem>
+    public class PutToDoItemById : IRequest<bool>
     {
         [FromBody]
-        public AddItemDto Item { get; }
+        public UpdateItemDto Item { get; }
+        [FromRoute]
+        public Guid Id { get; }
 
-        public AddToDo(AddItemDto item)
+        public PutToDoItemById(Guid id, UpdateItemDto item)
         {
             Item = item;
+            Id = id;
         }
     }
 }

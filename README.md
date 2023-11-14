@@ -63,7 +63,7 @@ Repository for learning C# by working through a ToDoList application in C#. Firs
 
     I found several solutions: 
     - `int newId = Interlocked.Increment(ref _nextId);`
-    - `Id = Guid.NewGuid(),`
+    - `Id = Guid.NewGuid(),`s
     - `lock (_lock) {}`
     
     which are complimentary in the sense that you can choose either `Guid` or `Interlocked.Increment` because they are both guaranteeing a unique Id. But additionally to control access to the "database" itself you need some kind of `lock` pattern.
@@ -81,12 +81,13 @@ Repository for learning C# by working through a ToDoList application in C#. Firs
 
 [TODISCUSS:]
 
-7. Stretch: Implement the Mediator Pattern. Look for inspiration in the existing code base.
-Mediatr.
-Request handler
-Queries/Commands: read/update
+7. Implement the Mediater Pattern. Look for inspiration in the existing code base.
+   Current code uses the `Mediatr` package.
+
+   Question: how to debug this? together with dependency injection? As you're not seeing where it is passed.
 
 8. Unit tests.
+    - Q: Why dont you moq in bci?
 9. making sure that the interface down to the database is async.
 --
 Later:

@@ -54,10 +54,9 @@ namespace ToDoList
             // Use the injected IToDoDatabase service
             group.MapGet<GetToDoItemById, ToDoItemDto?>("/{Id}/");
             group.MapGet<GetToDoItems, List<ToDoItemDto>>("/");
-            group.MapPost<AddToDo, ToDoItem>("/");
-            app.MapPut("/todos/{id}", (Guid id, UpdateItemDto item, IToDoDatabase database) => database.Update(id, item));
-            app.MapDelete("/todos/{id}", (Guid id, IToDoDatabase database) => database.Delete(id));
-
+            group.MapPost<AddToDoItem, ToDoItem>("/");
+            group.MapPut<PutToDoItemById, bool>("/{Id}/");
+            group.MapDelete<DeleteToDoItemById, bool>("/{Id}/");
 
             app.Run();
         }
