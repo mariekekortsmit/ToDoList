@@ -87,7 +87,9 @@ Repository for learning C# by working through a ToDoList application in C#. Firs
    Question: how to debug this? together with dependency injection? As you're not seeing where it is passed.
 
 8. Unit tests.
-    - Q: Why dont you moq in bci?
+    - How do you debug unit tests? So how can i see whats inside result?
+    - What else to unit test. MediatRExtensions? Not done in BCI.
+
 9. making sure that the interface down to the database is async.
 --
 Later:
