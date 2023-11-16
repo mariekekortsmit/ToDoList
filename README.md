@@ -77,18 +77,13 @@ Repository for learning C# by working through a ToDoList application in C#. Firs
     ``` 
     You don't need a new object `_lock` for this as you can just use `lock(this)` instead.
 6. Dependency inject which database to use.
+7. Implement the Mediater Pattern. Use the `Mediatr` package.
+8. Unit tests.
  
 
-[TODISCUSS:]
+[TODO:]
 
-7. Implement the Mediater Pattern. Look for inspiration in the existing code base.
-   Current code uses the `Mediatr` package.
 
-   Question: how to debug this? together with dependency injection? As you're not seeing where it is passed.
-
-8. Unit tests.
-    - How do you debug unit tests? So how can i see whats inside result?
-    - What else to unit test. MediatRExtensions? Not done in BCI.
 
 9. making sure that the interface down to the database is async.
 --

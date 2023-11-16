@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Moq;
+using ToDoList.DataAccess.Implementations;
 using ToDoList.DataAccess.Interfaces;
 using ToDoList.Models.Dtos;
 using ToDoList.Models.Entities;
@@ -14,20 +15,41 @@ namespace ToDoListTests
         public async Task Handle_ValidRequest_AddsItem()
         {
             // Arrange
-            var mockDatabase = new Mock<IToDoDatabase>();
+            var db = new InMemoryToDoDatabaseList();
             var addItemDto = new AddItemDto { Task = "Test Task", IsCompleted = false };
-            var expectedToDoItem = new ToDoItem { Id = Guid.NewGuid(), Task = "Test Task", IsCompleted = false };
-            mockDatabase.Setup(db => db.Add(addItemDto)).Returns(expectedToDoItem);
-            var handler = new AddToDoItemHandler(mockDatabase.Object);
-
+            var handler = new AddToDoItemHandler(db);
             var request = new AddToDoItem(addItemDto);
 
             // Act
             var result = await handler.Handle(request, CancellationToken.None);
 
             // Assert
-            result.Should().BeEquivalentTo(expectedToDoItem);
-            mockDatabase.Verify(db => db.Add(addItemDto), Times.Once);
+            result.Task.Should().BeEquivalentTo(addItemDto.Task);
+            result.IsCompleted.Should().Be(addItemDto.IsCompleted);
+        }
+
+        [Fact]
+        public async Task Handle_TwoIdenticalItems_AddsBoth()
+        {
+            // Arrange
+            var db = new InMemoryToDoDatabaseList();
+            var addItemDto = new AddItemDto { Task = "Test Task", IsCompleted = false };
+            var handler = new AddToDoItemHandler(db);
+            var request = new AddToDoItem(addItemDto);
+
+            // Act
+            await handler.Handle(request, CancellationToken.None);
+            await handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            var itemsInDb = db.GetAll();
+            itemsInDb.Should().HaveCount(2);
+            foreach (var item in itemsInDb)
+            {
+                item.Task.Should().Be(addItemDto.Task);
+                item.IsCompleted.Should().Be(addItemDto.IsCompleted);
+            }
+
         }
     }
 }

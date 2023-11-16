@@ -1,16 +1,20 @@
 using FluentAssertions;
 using ToDoList.DataAccess.Implementations;
+using ToDoList.DataAccess.Interfaces;
 using ToDoList.Models.Dtos;
 
 namespace ToDoListTests
 {
-    public class InMemoryToDoDatabaseDictTests
+    public class InMemoryToDoDatabaseDictTests : InMemoryToDoDatabaseTests<InMemoryToDoDatabaseDict> { }
+    public class InMemoryToDoDatabaseListTests : InMemoryToDoDatabaseTests<InMemoryToDoDatabaseList> { }
+
+    public abstract class InMemoryToDoDatabaseTests<T> where T: IToDoDatabase, new()
     {
         [Fact]
         public void GetAll_NonEmptyDatabase_ShouldReturnAllItems()
         {
             // Arrange
-            var database = new InMemoryToDoDatabaseDict();
+            var database = new T();
             var item1 = database.Add(new AddItemDto { Task = "Task 1", IsCompleted = false });
             var item2 = database.Add(new AddItemDto { Task = "Task 2", IsCompleted = true });
 
@@ -27,21 +31,20 @@ namespace ToDoListTests
         public void GetAll_EmptyDatabase_ShouldReturn()
         {
             // Arrange
-            var database = new InMemoryToDoDatabaseDict();
+            var database = new T();
             
             // Act
             var result = database.GetAll();
 
             // Assert
             result.Should().HaveCount(0);
-            //Maybe some other asserts?
         }
 
         [Fact]
         public void Get_ValidId_ShouldReturnItem()
         {
             // Arrange
-            var database = new InMemoryToDoDatabaseDict();
+            var database = new T();
             var newItem = database.Add(new AddItemDto { Task = "New Task", IsCompleted = false });
 
             // Act
@@ -58,7 +61,7 @@ namespace ToDoListTests
         public void Get_InvalidId_ShouldReturnNull()
         {
             // Arrange
-            var database = new InMemoryToDoDatabaseDict();
+            var database = new T();
 
             // Act
             var result = database.Get(Guid.NewGuid());
@@ -71,7 +74,7 @@ namespace ToDoListTests
         public void Add_ValidItem_ShouldAddItem()
         {
             // Arrange
-            var database = new InMemoryToDoDatabaseDict();
+            var database = new T();
             var item = new AddItemDto { Task = "New Task", IsCompleted = false };
 
             // Act
@@ -85,26 +88,10 @@ namespace ToDoListTests
         }
 
         [Fact]
-        public void Add_NullItem()
-        {
-            // Arrange
-            var database = new InMemoryToDoDatabaseDict();
-
-            // Act & Assert
-            var exception = Assert.Throws<NullReferenceException>(() => database.Add(null));
-        }
-
-        /*
-         * Add_NullItem: if I do database.Add(null) then it already complains. Is it then still valid to test?
-         * Add_DuplicateItem: no need to test this because of the guids?
-         * Add_ItemWithInvalidFields: same
-         */
-
-        [Fact]
         public void Update_ValidItem_UpdatesItem()
         {
             // Arrange
-            var database = new InMemoryToDoDatabaseDict();
+            var database = new T();
             var existingItem = database.Add(new AddItemDto { Task = "Original Task", IsCompleted = false });
             var updatedItem = new UpdateItemDto { Task = "Updated Task", IsCompleted = true };
 
@@ -115,8 +102,8 @@ namespace ToDoListTests
             // Assert
             result.Should().BeTrue();
             retrievedItem.Should().NotBeNull();
-            retrievedItem.Task.Should().Be(updatedItem.Task);
-            retrievedItem.IsCompleted.Should().Be(updatedItem.IsCompleted.Value);
+            retrievedItem?.Task.Should().Be(updatedItem.Task);
+            retrievedItem?.IsCompleted.Should().Be(updatedItem.IsCompleted.Value);
         }
         /*
          * Update_InvalidId
