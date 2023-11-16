@@ -26,7 +26,7 @@ namespace ToDoListTests
             var request = new DeleteToDoItemById(addedId);
 
             // Act
-            var result = await handler.Handle(request, CancellationToken.None);
+            await handler.Handle(request, CancellationToken.None);
 
             // Assert
             var itemsInDb = db.GetAll();
@@ -38,10 +38,8 @@ namespace ToDoListTests
         {
             // Arrange
             var db = new InMemoryToDoDatabaseList();
-            var addItemDto = new AddItemDto { Task = "Test Task", IsCompleted = false };
-            var addedId = db.Add(addItemDto).Id;
             var handler = new DeleteToDoItemByIdHandler(db);
-            Guid invalidId = new Guid();
+            Guid invalidId = new ();
             var request = new DeleteToDoItemById(invalidId);
 
             // Act

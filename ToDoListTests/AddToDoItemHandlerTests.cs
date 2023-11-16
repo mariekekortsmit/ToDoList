@@ -51,5 +51,29 @@ namespace ToDoListTests
             }
 
         }
+
+        [Fact]
+        public async Task Handle_TwoDifferentItems_AddsBoth()
+        {
+            // Arrange
+            var db = new InMemoryToDoDatabaseList();
+            var addItemDto1 = new AddItemDto { Task = "Test Task 1", IsCompleted = false };
+            var addItemDto2 = new AddItemDto { Task = "Test Task 2", IsCompleted = true };
+            var handler = new AddToDoItemHandler(db);
+            var request1 = new AddToDoItem(addItemDto1);
+            var request2 = new AddToDoItem(addItemDto2);
+
+            // Act
+            var result1 = await handler.Handle(request1, CancellationToken.None);
+            var result2 = await handler.Handle(request2, CancellationToken.None);
+
+            // Assert
+            var itemsInDb = db.GetAll();
+            itemsInDb.Should().HaveCount(2);
+            result1.Task.Should().Be(addItemDto1.Task);
+            result1.IsCompleted.Should().Be(addItemDto1.IsCompleted);
+            result2.Task.Should().Be(addItemDto2.Task);
+            result2.IsCompleted.Should().Be(addItemDto2.IsCompleted);
+        }
     }
 }
