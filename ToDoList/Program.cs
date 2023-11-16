@@ -1,8 +1,16 @@
 
+using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using ToDoList.DataAccess.Implementations;
 using ToDoList.DataAccess.Interfaces;
+//using ToDos.Queries.Requests;
 using ToDoList.Models.Dtos;
+using ToDoList;
+using ToDoList.ToDos.Queries.Requests;
+using ToDoList.ToDos.Commands.Requests;
+using ToDoList.Models.Entities;
 
 namespace ToDoList
 {
@@ -21,7 +29,10 @@ namespace ToDoList
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();          
+            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
 
             var app = builder.Build();
 
@@ -36,13 +47,16 @@ namespace ToDoList
 
             app.UseAuthorization();
 
-            // Use the injected IToDoDatabase service
-            app.MapGet("/todos/{id}", (Guid id, IToDoDatabase database) => database.Get(id));
-            app.MapGet("/todos", (IToDoDatabase database) => database.GetAll());
-            app.MapPost("/todos", (AddItemDto item, IToDoDatabase database) => database.Add(item));
-            app.MapPut("/todos/{id}", (Guid id, UpdateItemDto item, IToDoDatabase database) => database.Update(id, item));
-            app.MapDelete("/todos/{id}", (Guid id, IToDoDatabase database) => database.Delete(id));
+            var group = app
+               .MapGroup("/todos")
+               .WithTags("todos")               ;
 
+            // Use the injected IToDoDatabase service
+            group.MapGet<GetToDoItemById, ToDoItemDto?>("/{Id}/");
+            group.MapGet<GetToDoItems, List<ToDoItemDto>>("/");
+            group.MapPost<AddToDoItem, ToDoItem>("/");
+            group.MapPut<PutToDoItemById, bool>("/{Id}/");
+            group.MapDelete<DeleteToDoItemById, bool>("/{Id}/");
 
             app.Run();
         }
