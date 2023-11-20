@@ -1,21 +1,18 @@
 # 🌟 Welcome to my Journey of Learning C# with ToDoList! 🌟
 
-🎉 Hey there! Welcome to my adventure in the world of C# programming! This repository isn't just about coding; it's about enjoying the journey of building a ToDoList application from the ground up. 🚀
+🎉 Hey there! Welcome to my adventure in the world of C# programming! This repository isn't just about coding; it's about me (and potentially you) enjoying the journey of building a ToDoList application from the ground up. 🚀
 
 Here's how you can join in the fun:
 
-1. Start Simple: Kick off with a console-based ToDoList app. It's like the "Hello, World!" of our adventure.
+1. Start Simple: Kick off with a console-based ToDoList app. It's like the "Hello, World!" of the project.
 1. Level Up: Transform your simple app into a feature-rich masterpiece, step by step.
 1. Explore and Discover: Each assignment is a new quest in the land of C#, complete with my own treasure maps (notes) and secrets I've unearthed along the way. 🗺️
 
 Expect to find:
 
 - 🤔 Puzzles to solve.
-- 💡 'Aha!' moments.
+- 💡 My 'Aha!' moments.
 - 📚 Learning, packaged in a mix of challenges and triumphs.
-
-
-Repository for learning C# by working through a ToDoList application in C#. First, write a simple todo-application as console application. Next do a rest API. Then build it up step by step according to the assignments.
 
 ## Let the adventure begin
 
@@ -23,9 +20,9 @@ ToDoList: Your Ticket to Coding Adventures! Embark on this quest to conquer the 
 
 Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
 
-1.  Write a simple ToDoLits application as console application.
-1.  Convert the solution to use REST API.
-1.  Replace all foreach loops with LINQ:
+1.  **Write a simple ToDoLits application as console application.**
+1.  **Convert the solution to use REST API.**
+1.  **Replace all foreach loops with LINQ:**
 
     Current implementation uses `FirstOrDefault` as follows:
     ```csharp
@@ -77,10 +74,10 @@ Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
         }
     }
     ```
-1.  Replace the inmemory database with an interface;
-1.  Add a seperate implementation for the database that uses a dictionary instead of a list.
-1.  Split out classes and files in different folders.
-1.  Update the code to handle concurrent updates. Assume 2 people are creating a new todo item at the same time. What to do with the ids? Think of the solution as 
+1.  **Replace the inmemory database with an interface;**
+1.  **Add a seperate implementation for the database that uses a dictionary instead of a list.**
+1.  **Split out classes and files in different folders.**
+1.  **Update the code to handle concurrent updates.** Assume 2 people are creating a new todo item at the same time. What to do with the ids? Think of the solution as 
     multiple backends running against a central database. The database will then handle the concurrency. How to solve it here? 
 
     I found several solutions: 
@@ -98,11 +95,11 @@ Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
     }
     ``` 
     You don't need a new object `_lock` for this as you can just use `lock(this)` instead.
-1.  Dependency inject which database to use.
-1.  Implement the Mediater Pattern. Use the `Mediatr` package.
-1.  Unit tests.
+1.  **Dependency inject which database to use.**
+1.  **Implement the Mediater Pattern.** Use the `Mediatr` package.
+1.  **Unit tests.**
     
-    - Using the interface to test both db implementations in the same way.
+    - *Using the interface to test both db implementations in the same way.*
 
         At first, I just unit tested one implementation of my database, the dictionary version, with something that looked like this:
         ```csharp
@@ -142,7 +139,7 @@ Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
         }
         ```
 
-    - Mocks in unit testing: 
+    - *Mocks in unit testing: *
         
         The first implementation of unit tests included a mocked database based on the interface like this:
         ```csharp
@@ -166,3 +163,6 @@ Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
             }
         ```
         However, as the database implementations should be fully tested, you don't need to mock the actual database in your other tests as you can then trust this is doing the correct thing (you've covered this in your other unit tests).
+1.  **Learn and implement Asynchronous Programming.** 
+    - **Learn**: to understand the basics of async programming, I've created a Console Application in the LearningAsync folder, together with a README on all the learnings. 
+    - **Implement**: make the database interface and implementations asynchronous, including taking in and checking a CancellationToken. Also, write the tests for that interface asynchronous.
