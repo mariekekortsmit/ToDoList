@@ -7,43 +7,51 @@ namespace ToDoList.DataAccess.Implementations
     public class InMemoryToDoDatabaseDict : IToDoDatabase
     {
         private readonly Dictionary<Guid, ToDoItem> _items = new();
-        private readonly object _lock = new();
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
 
 
         // Retrieve all items.
-        public List<ToDoItemDto> GetAll()
+        public async Task<List<ToDoItemDto>> GetAllAsync(CancellationToken cancellationToken)
         {
-            lock (_lock)
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
                 return _items.Values.Select(x => x.ToDto()).ToList();
             }
+            finally { _semaphore.Release(); }
         }
 
         // Find an item by Id.
-        public ToDoItemDto? Get(Guid id)
+        public async Task<ToDoItemDto?> GetAsync(Guid id, CancellationToken cancellationToken)
         {
-            lock (_lock)
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
                 var found = _items.TryGetValue(id, out ToDoItem? value);
                 return found ? value?.ToDto() : null;
             }
+            finally { _semaphore.Release(); }
         }
 
         // Add a new item.
-        public ToDoItem Add(AddItemDto item)
+        public async Task<ToDoItem> AddAsync(AddItemDto item, CancellationToken cancellationToken)
         {
             var newItem = new ToDoItem() { Id = Guid.NewGuid(), Task = item.Task, IsCompleted = item.IsCompleted };
-            lock (_lock)
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
                 _items.Add(newItem.Id, newItem);
             }
+            finally { _semaphore.Release();  }
+
             return newItem;
         }
 
         // Update an existing item.
-        public bool Update(Guid id, UpdateItemDto item)
+        public async Task<bool> UpdateAsync(Guid id, UpdateItemDto item, CancellationToken cancellationToken)
         {
-            lock (_lock)
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
                 // Attempt to retrieve the item with the specified id.
                 if (_items.TryGetValue(id, out var itemToUpdate))
@@ -60,14 +68,17 @@ namespace ToDoList.DataAccess.Implementations
                     return true;
                 }
             }
+            finally { _semaphore.Release(); }
+
             // If the item was not found, return false.
             return false;
         }
 
         // Delete an item by Id.
-        public bool Delete(Guid id)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            lock (_lock)
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
                 // Check if the item exists in the dictionary before attempting to delete.
                 if (_items.TryGetValue(id, out _))
@@ -77,6 +88,8 @@ namespace ToDoList.DataAccess.Implementations
                     return true;
                 }
             }
+            finally { _semaphore.Release(); }
+
             // The item was not found, so there is nothing to delete.
             return false;
         }

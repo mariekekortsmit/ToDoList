@@ -21,7 +21,7 @@ namespace ToDoListTests
             // Arrange
             var db = new InMemoryToDoDatabaseList();
             var addItemDto = new AddItemDto { Task = "Test Task", IsCompleted = false };
-            var addedId = db.Add(addItemDto).Id;
+            var addedId = (await db.AddAsync(addItemDto, CancellationToken.None)).Id;
             var handler = new DeleteToDoItemByIdHandler(db);
             var request = new DeleteToDoItemById(addedId);
 
@@ -29,7 +29,7 @@ namespace ToDoListTests
             await handler.Handle(request, CancellationToken.None);
 
             // Assert
-            var itemsInDb = db.GetAll();
+            var itemsInDb = await db.GetAllAsync(CancellationToken.None);
             itemsInDb.Should().BeEmpty();
         }
 
@@ -47,6 +47,27 @@ namespace ToDoListTests
 
             // Assert
             result.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Handle_ValidId_WithCancelledToken_DoesNotDelete_ThrowsTaskCanceledException() 
+        {
+            // Arrange
+            var db = new InMemoryToDoDatabaseList();
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            var addItemDto = new AddItemDto { Task = "Test Task", IsCompleted = false };
+            var addedId = (await db.AddAsync(addItemDto, CancellationToken.None)).Id;
+            var handler = new DeleteToDoItemByIdHandler(db);
+            var request = new DeleteToDoItemById(addedId);
+
+            // Act
+            Task action() => handler.Handle(request, cancellationTokenSource.Token);
+
+            // Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(action);
+            var itemsInDb = await db.GetAllAsync(CancellationToken.None);
+            itemsInDb.Should().HaveCount(1);
         }
     }
 }

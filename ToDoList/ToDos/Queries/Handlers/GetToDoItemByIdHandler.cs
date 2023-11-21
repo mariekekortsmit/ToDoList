@@ -14,10 +14,10 @@ namespace ToDoList.ToDos.Queries.Handlers
             _database = database;
         }
 
-        public Task<ToDoItemDto?> Handle(GetToDoItemById request, CancellationToken cancellationToken)
+        public async Task<ToDoItemDto?> Handle(GetToDoItemById request, CancellationToken cancellationToken)
         {
-            var items = _database.Get(request.Id);
-            return Task.FromResult(items);
+            var items = await _database.GetAsync(request.Id, cancellationToken);
+            return items;
         }
     }
 }

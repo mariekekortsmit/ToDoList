@@ -15,10 +15,10 @@ namespace ToDoList.ToDos.Commands.Handlers
             _database = database;
         }
 
-        public Task<bool> Handle(DeleteToDoItemById request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(DeleteToDoItemById request, CancellationToken cancellationToken)
         {
-            bool deleted = _database.Delete(request.Id);
-            return Task.FromResult(deleted);
+            bool deleted = await _database.DeleteAsync(request.Id, cancellationToken);
+            return deleted;
         }
     }
 }

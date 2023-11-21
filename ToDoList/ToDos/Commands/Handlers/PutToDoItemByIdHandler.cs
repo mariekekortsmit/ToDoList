@@ -15,10 +15,10 @@ namespace ToDoList.ToDos.Commands.Handlers
             _database = database;
         }
 
-        public Task<bool> Handle(PutToDoItemById request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(PutToDoItemById request, CancellationToken cancellationToken)
         {
-            bool updated = _database.Update(request.Id, request.Item);
-            return Task.FromResult(updated);
+            bool updated = await _database.UpdateAsync(request.Id, request.Item, cancellationToken);
+            return updated;
         }
 
     }

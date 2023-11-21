@@ -11,15 +11,15 @@ namespace ToDoListTests
     public abstract class InMemoryToDoDatabaseTests<T> where T: IToDoDatabase, new()
     {
         [Fact]
-        public void GetAll_NonEmptyDatabase_ShouldReturnAllItems()
+        public async Task GetAllAsync_NonEmptyDatabase_ShouldReturnAllItems()
         {
             // Arrange
             var database = new T();
-            var item1 = database.Add(new AddItemDto { Task = "Task 1", IsCompleted = false });
-            var item2 = database.Add(new AddItemDto { Task = "Task 2", IsCompleted = true });
+            var item1 = await database.AddAsync(new AddItemDto { Task = "Task 1", IsCompleted = false }, CancellationToken.None);
+            var item2 = await database.AddAsync(new AddItemDto { Task = "Task 2", IsCompleted = true }, CancellationToken.None);
 
             // Act
-            var result = database.GetAll();
+            var result = await database.GetAllAsync(CancellationToken.None);
 
             // Assert
             result.Should().HaveCount(2);
@@ -28,27 +28,43 @@ namespace ToDoListTests
         }
 
         [Fact]
-        public void GetAll_EmptyDatabase_ShouldReturn()
+        public async Task GetAllAsync_EmptyDatabase_ShouldReturn()
         {
             // Arrange
             var database = new T();
             
             // Act
-            var result = database.GetAll();
+            var result = await database.GetAllAsync(CancellationToken.None);
 
             // Assert
             result.Should().HaveCount(0);
         }
 
         [Fact]
-        public void Get_ValidId_ShouldReturnItem()
+        public async Task GetAllAsync_WithCancelledToken_ThrowsTaskCanceledException()
         {
             // Arrange
             var database = new T();
-            var newItem = database.Add(new AddItemDto { Task = "New Task", IsCompleted = false });
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            // Act 
+            Task action() => database.GetAllAsync(cancellationTokenSource.Token);
+
+            // Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(action);
+        }
+
+
+        [Fact]
+        public async Task GetAsync_ValidId_ShouldReturnItem()
+        {
+            // Arrange
+            var database = new T();
+            var newItem = await database.AddAsync(new AddItemDto { Task = "New Task", IsCompleted = false }, CancellationToken.None);
 
             // Act
-            var result = database.Get(newItem.Id);
+            var result = await database.GetAsync(newItem.Id, CancellationToken.None);
 
             // Assert
             result.Should().NotBeNull();
@@ -58,46 +74,78 @@ namespace ToDoListTests
         }
 
         [Fact]
-        public void Get_InvalidId_ShouldReturnNull()
+        public async Task GetAsync_InvalidId_ShouldReturnNull()
         {
             // Arrange
             var database = new T();
 
             // Act
-            var result = database.Get(Guid.NewGuid());
+            var result = await database.GetAsync(Guid.NewGuid(), CancellationToken.None);
 
             // Assert
             result.Should().BeNull();
         }
 
         [Fact]
-        public void Add_ValidItem_ShouldAddItem()
+        public async Task GetAsync_WithCancelledToken_ThrowsTaskCanceledException()
+        {
+            // Arrange
+            var database = new T();
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            // Act 
+            Task action() => database.GetAsync(Guid.NewGuid(), cancellationTokenSource.Token);
+
+            // Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(action);
+        }
+
+        [Fact]
+        public async Task AddAsync_ValidItem_ShouldAddItem()
         {
             // Arrange
             var database = new T();
             var item = new AddItemDto { Task = "New Task", IsCompleted = false };
 
             // Act
-            var result = database.Add(item);
+            var result = await database.AddAsync(item, CancellationToken.None);
 
             // Assert
             result.Should().NotBeNull();
             result.Task.Should().Be("New Task");
             result.IsCompleted.Should().BeFalse();
-            database.GetAll().Should().ContainSingle(i => i.Id == result.Id);
+            (await database.GetAllAsync(CancellationToken.None)).Should().ContainSingle(i => i.Id == result.Id);
         }
 
         [Fact]
-        public void Update_ValidItem_UpdatesItem()
+        public async Task AddAsync_WithCancelledToken_DoesNotAdd_ThrowsTaskCanceledException()
         {
             // Arrange
             var database = new T();
-            var existingItem = database.Add(new AddItemDto { Task = "Original Task", IsCompleted = false });
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            var item = new AddItemDto { Task = "New Task", IsCompleted = false };
+
+            // Act 
+            Task action() => database.AddAsync(item, cancellationTokenSource.Token);
+
+            // Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(action);
+            (await database.GetAllAsync(CancellationToken.None)).Should().HaveCount(0);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ValidItem_UpdatesItem()
+        {
+            // Arrange
+            var database = new T();
+            var existingItem = await database.AddAsync(new AddItemDto { Task = "Original Task", IsCompleted = false }, CancellationToken.None);
             var updatedItem = new UpdateItemDto { Task = "Updated Task", IsCompleted = true };
 
             // Act
-            var result = database.Update(existingItem.Id, updatedItem);
-            var retrievedItem = database.Get(existingItem.Id);
+            var result = await database.UpdateAsync(existingItem.Id, updatedItem, CancellationToken.None);
+            var retrievedItem = await database.GetAsync(existingItem.Id, CancellationToken.None);
 
             // Assert
             result.Should().BeTrue();
@@ -110,6 +158,27 @@ namespace ToDoListTests
          * Update_ItemWithInvalidFields
          * Update_NonExistingItem
          */
+
+        [Fact]
+        public async Task UpdateAsync_ValidItem_WithCancelledToken_DoesNotUpdate_ThrowsTaskCanceledException()
+        {
+            // Arrange
+            var database = new T();
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            var existingItem = await database.AddAsync(new AddItemDto { Task = "Original Task", IsCompleted = false }, CancellationToken.None);
+            var updatedItem = new UpdateItemDto { Task = "Updated Task", IsCompleted = true };
+
+            // Act 
+            Task action() => database.UpdateAsync(existingItem.Id, updatedItem, cancellationTokenSource.Token);
+            var retrievedItem = await database.GetAsync(existingItem.Id, CancellationToken.None);
+
+            // Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(action);
+            retrievedItem.Should().NotBeNull();
+            retrievedItem?.Task.Should().Be(existingItem.Task);
+            retrievedItem?.IsCompleted.Should().Be(existingItem.IsCompleted);
+        }
     }
 }
 
