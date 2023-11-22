@@ -16,7 +16,14 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                return _items.Select(x => x.ToDto()).ToList();
+                return await Task.Run<List<ToDoItemDto>>(() =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return new List<ToDoItemDto>(); // Return an empty list
+                    }
+                    return _items.Select(x => x.ToDto()).ToList();
+                });
             }
             finally { _semaphore.Release(); }
         }
@@ -27,7 +34,14 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                return _items.FirstOrDefault(item => item.Id == id)?.ToDto();
+                return await Task.Run<ToDoItemDto?>(() => 
+                {
+                    if(cancellationToken.IsCancellationRequested)
+                    {
+                        return null;
+                    }
+                    return _items.FirstOrDefault(item => item.Id == id)?.ToDto();
+                });
             }
             finally { _semaphore.Release(); }
         }
@@ -39,11 +53,17 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                _items.Add(newItem);
+                return await Task.Run<ToDoItem>(() =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return new ToDoItem(); // Return an empty item
+                    }
+                    _items.Add(newItem);
+                    return newItem;
+                });
             }
             finally { _semaphore.Release(); }
-
-            return newItem;
         }
 
         // Update an existing item.
@@ -52,23 +72,29 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                var itemToUpdate = _items.FirstOrDefault(item => item.Id == id);
-                if (itemToUpdate != null)
+                return await Task.Run<bool>(() =>
                 {
-                    if (item.Task != null)
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        itemToUpdate.Task = item.Task;
+                        return false;
                     }
-                    if (item.IsCompleted.HasValue)
+                    var itemToUpdate = _items.FirstOrDefault(item => item.Id == id);
+                    if (itemToUpdate != null)
                     {
-                        itemToUpdate.IsCompleted = item.IsCompleted.Value;
+                        if (item.Task != null)
+                        {
+                            itemToUpdate.Task = item.Task;
+                        }
+                        if (item.IsCompleted.HasValue)
+                        {
+                            itemToUpdate.IsCompleted = item.IsCompleted.Value;
+                        }
+                        return true;
                     }
-                    return true;
-                }
+                    return false;
+                });
             }
             finally { _semaphore.Release(); }
-
-            return false;
         }
 
         // Delete an item by Id.
@@ -77,17 +103,24 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                var itemToDelete = _items.FirstOrDefault(item => item.Id == id);
-                if (itemToDelete != null)
+                return await Task.Run<bool>(() =>
                 {
-                    _items.Remove(itemToDelete);
-                    return true;
-                }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return false;
+                    }
+                    var itemToDelete = _items.FirstOrDefault(item => item.Id == id);
+                    if (itemToDelete != null)
+                    {
+                        _items.Remove(itemToDelete);
+                        return true;
+                    }
+                    return false;
+                 });
             }
 
             finally { _semaphore.Release(); }
-
-            return false;
         }
     }
 }
+          

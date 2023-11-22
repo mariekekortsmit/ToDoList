@@ -169,12 +169,10 @@ namespace ToDoListTests
             var existingItem = await database.AddAsync(new AddItemDto { Task = "Original Task", IsCompleted = false }, CancellationToken.None);
             var updatedItem = new UpdateItemDto { Task = "Updated Task", IsCompleted = true };
 
-            // Act 
-            Task action() => database.UpdateAsync(existingItem.Id, updatedItem, cancellationTokenSource.Token);
-            var retrievedItem = await database.GetAsync(existingItem.Id, CancellationToken.None);
+            // Act & Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(() => database.UpdateAsync(existingItem.Id, updatedItem, cancellationTokenSource.Token));
 
-            // Assert
-            await Assert.ThrowsAsync<TaskCanceledException>(action);
+            var retrievedItem = await database.GetAsync(existingItem.Id, CancellationToken.None);
             retrievedItem.Should().NotBeNull();
             retrievedItem?.Task.Should().Be(existingItem.Task);
             retrievedItem?.IsCompleted.Should().Be(existingItem.IsCompleted);

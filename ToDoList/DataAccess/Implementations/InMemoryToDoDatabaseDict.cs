@@ -16,7 +16,14 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                return _items.Values.Select(x => x.ToDto()).ToList();
+                return await Task.Run<List<ToDoItemDto>>(() =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return new List<ToDoItemDto>(); // Return an empty list
+                    }
+                    return _items.Values.Select(x => x.ToDto()).ToList();
+                });
             }
             finally { _semaphore.Release(); }
         }
@@ -27,8 +34,16 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                var found = _items.TryGetValue(id, out ToDoItem? value);
-                return found ? value?.ToDto() : null;
+                return await Task.Run<ToDoItemDto?>(() =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return null;
+                    }
+                    var found = _items.TryGetValue(id, out ToDoItem? value);
+                    return found ? value?.ToDto() : null;
+                });
+               
             }
             finally { _semaphore.Release(); }
         }
@@ -40,11 +55,17 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                _items.Add(newItem.Id, newItem);
+                return await Task.Run<ToDoItem>(() =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return new ToDoItem(); // Return an empty item
+                    }
+                    _items.Add(newItem.Id, newItem);
+                    return newItem;
+                }); 
             }
             finally { _semaphore.Release();  }
-
-            return newItem;
         }
 
         // Update an existing item.
@@ -53,25 +74,32 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                // Attempt to retrieve the item with the specified id.
-                if (_items.TryGetValue(id, out var itemToUpdate))
+                return await Task.Run<bool>(() =>
                 {
-                    // If the item was found, proceed with the update.
-                    if (item.Task != null)
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        itemToUpdate.Task = item.Task;
+                        return false;
                     }
-                    if (item.IsCompleted.HasValue)
+                    // Attempt to retrieve the item with the specified id.
+                    if (_items.TryGetValue(id, out var itemToUpdate))
                     {
-                        itemToUpdate.IsCompleted = item.IsCompleted.Value;
+                        // If the item was found, proceed with the update.
+                        if (item.Task != null)
+                        {
+                            itemToUpdate.Task = item.Task;
+                        }
+                        if (item.IsCompleted.HasValue)
+                        {
+                            itemToUpdate.IsCompleted = item.IsCompleted.Value;
+                        }
+                        return true;
                     }
-                    return true;
-                }
+                    // If the item was not found, return false.
+                    return false;
+                });
             }
             finally { _semaphore.Release(); }
 
-            // If the item was not found, return false.
-            return false;
         }
 
         // Delete an item by Id.
@@ -80,18 +108,25 @@ namespace ToDoList.DataAccess.Implementations
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                // Check if the item exists in the dictionary before attempting to delete.
-                if (_items.TryGetValue(id, out _))
+                return await Task.Run<bool>(() =>
                 {
-                    // The item exists, so remove it from the dictionary.
-                    _items.Remove(id);
-                    return true;
-                }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return false;
+                    }
+                    // Check if the item exists in the dictionary before attempting to delete.
+                    if (_items.TryGetValue(id, out _))
+                    {
+                        // The item exists, so remove it from the dictionary.
+                        _items.Remove(id);
+                        return true;
+                    }
+                    // The item was not found, so there is nothing to delete.
+                    return false;
+                });
+
             }
             finally { _semaphore.Release(); }
-
-            // The item was not found, so there is nothing to delete.
-            return false;
         }
 
     }

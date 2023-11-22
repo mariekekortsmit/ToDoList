@@ -10,9 +10,9 @@ Here's how you can join in the fun:
 
 Expect to find:
 
-- 🤔 Puzzles to solve.
+- 🤔 The puzzles I solved.
 - 💡 My 'Aha!' moments.
-- 📚 Learning, packaged in a mix of challenges and triumphs.
+- 📚 Personal learnings, packaged in a mix of challenges and triumphs.
 
 ## Let the adventure begin
 
@@ -166,3 +166,39 @@ Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
 1.  **Learn and implement Asynchronous Programming.** 
     - **Learn**: to understand the basics of async programming, I've created a Console Application in the LearningAsync folder, together with a README on all the learnings. 
     - **Implement**: make the database interface and implementations asynchronous, including taking in and checking a CancellationToken. Also, write the tests for that interface asynchronous.
+    
+    My first attempt at implementing the async setup looked like this for one of the database implementation functions:
+    ```csharp
+    // Retrieve all items.
+    public async Task<List<ToDoItemDto>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        await _semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            return _items.Select(x => x.ToDto()).ToList();
+        }
+        finally { _semaphore.Release(); }
+    }
+    ```
+    where it acquires an async lock before executing the task. After acquiring that lock, it directly returns the transformed list. The transformation of the list items into `ToDoItemDto` objects and the conversion to a list is done within the same thread that called the method. However, if you implement it like this:
+    ```csharp
+    // Retrieve all items.
+    public async Task<List<ToDoItemDto>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        await _semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            return await Task.Run<List<ToDoItemDto>>(() =>
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+                return _items.Select(x => x.ToDto()).ToList();
+            });
+        }
+        finally { _semaphore.Release(); }
+    }
+    ```
+    it wraps the list transformation inside a `Task.Run`, meaning it is executed on a seperate thread from the thread pool. By using this approach it offloads the processing to a background thread which can be beneficial if the transformation itself takes a considerable amount of time. By offloading to a background thread, it keeps the calling thread (potentially the main UI thread) responsive.  
+ 
