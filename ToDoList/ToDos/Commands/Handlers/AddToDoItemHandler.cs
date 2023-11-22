@@ -15,10 +15,10 @@ namespace ToDoList.ToDos.Commands.Handlers
             _database = database;
         }
 
-        public Task<ToDoItem> Handle(AddToDoItem request, CancellationToken cancellationToken)
+        public async Task<ToDoItem> Handle(AddToDoItem request, CancellationToken cancellationToken)
         {
-            var newItem = _database.Add(request.Item);
-            return Task.FromResult(newItem);
+            var newItem = await _database.AddAsync(request.Item, cancellationToken);
+            return newItem;
         }
 
     }

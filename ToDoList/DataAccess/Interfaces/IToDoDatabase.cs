@@ -5,10 +5,10 @@ namespace ToDoList.DataAccess.Interfaces
 {
     public interface IToDoDatabase
     {
-        List<ToDoItemDto> GetAll();
-        ToDoItemDto? Get(Guid id);
-        ToDoItem Add(AddItemDto item);
-        bool Update(Guid id, UpdateItemDto item);
-        bool Delete(Guid id);
+        Task<List<ToDoItemDto>> GetAllAsync(CancellationToken cancellationToken);
+        Task<ToDoItemDto?> GetAsync(Guid id, CancellationToken cancellationToken);
+        Task<ToDoItem> AddAsync(AddItemDto item, CancellationToken cancellationToken);
+        Task<bool> UpdateAsync(Guid id, UpdateItemDto item, CancellationToken cancellationToken);
+        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
     }
 }
