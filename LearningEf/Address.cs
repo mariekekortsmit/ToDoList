@@ -9,7 +9,8 @@ namespace LearningEF
         public string? Street { get; set; }
         public string? City { get; set; }
 
+        public int? PersonId { get; set; }
         [JsonIgnore]
-        public Person Person { get; set; }
+        public Person? Person { get; set; }
     }
 }

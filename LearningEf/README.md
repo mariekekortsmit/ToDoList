@@ -111,3 +111,30 @@ migration and update the database afterwards:
     - **Entity Model Classes**:
         - **Address**:
             - Has a many:1 relationship with Person. One person can have multiple addresses (home address, work address, post address).
+
+    Note that EF Core automatially  identifies `PersonId` as the foreign key because `Person` is added as navigation property to the Address Class. If you would have called it `PersonId2`, it would not have automatically recognized it and you'd need to add to your code. 
+    
+    Add to `PersonDbContext` using FluentAPI:
+    ```charsp
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Address>()
+            .HasOne(a => a.Person)
+            .WithMany(p => p.Addresses)
+            .HasForeignKey(a => a.PersonId2); // Explicitly specifying the foreign key
+    }
+    ```
+    Or add to `Address` class using Data Annotations:
+    ```csharp
+    public class Address
+    {
+        public int Id { get; set; }
+        public string? Street { get; set; }
+        public string? City { get; set; }
+
+        public int? PersonId2 { get; set; } // Custom foreign key name
+
+        [ForeignKey("PersonId2")]
+        public Person Person { get; set; }
+    }
+    ```

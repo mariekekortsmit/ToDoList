@@ -8,6 +8,7 @@ namespace LearningEF
         public PersonDbContext(DbContextOptions<PersonDbContext> options)
                : base(options)
         {
+            this.Database.Migrate();
         }
 
         public DbSet<Person> Person { get; set; }
