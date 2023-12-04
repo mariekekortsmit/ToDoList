@@ -201,4 +201,6 @@ Ready? Set? Code! 🌈👨‍💻👩‍💻🌈
     }
     ```
     it wraps the list transformation inside a `Task.Run`, meaning it is executed on a seperate thread from the thread pool. By using this approach it offloads the processing to a background thread which can be beneficial if the transformation itself takes a considerable amount of time. By offloading to a background thread, it keeps the calling thread (potentially the main UI thread) responsive.  
- 
+1.  **Learn and implement Entity Framework Core.** 
+    - **Learn**: to understand the basics of EF core, I've created a very simple webapp in the LearningEF folder, together with a README on all the learnings.  
+    - **Implement**: tb done. 

@@ -1,0 +1,6 @@
+@LearningEF_HostAddress = http://localhost:5078
+
+GET {{LearningEF_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
