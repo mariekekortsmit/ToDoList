@@ -1,6 +1,7 @@
 using LearningEF;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,12 +63,16 @@ app.MapGet("/Address", (PersonDbContext context) =>
 
 app.MapPost("/Address", (Address address, PersonDbContext context) =>
 {
+    // Check if PersonId is provided and valid
+    if (address.PersonId != null && !context.Person.Any(p => p.Id == address.PersonId))
+    {
+        return Results.BadRequest("Invalid PersonId");
+    }
     context.Add(address);
     context.SaveChanges();
     return Results.Created($"/Address/{address.Id}", address);
 })
 .WithName("CreateAddress")
 .WithOpenApi();
-
 
 app.Run();
