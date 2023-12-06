@@ -1,16 +1,11 @@
-
-using MediatR;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using ToDoList.DataAccess.Implementations;
 using ToDoList.DataAccess.Interfaces;
-//using ToDos.Queries.Requests;
 using ToDoList.Models.Dtos;
-using ToDoList;
 using ToDoList.ToDos.Queries.Requests;
 using ToDoList.ToDos.Commands.Requests;
 using ToDoList.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ToDoList
 {
@@ -23,9 +18,33 @@ namespace ToDoList
             // Add services to the container.
             builder.Services.AddAuthorization();
 
-            // Register the InMemoryToDoDatabaseDict with DI container.
-            // If you want to use a different database, register it here.
-            builder.Services.AddSingleton<IToDoDatabase, InMemoryToDoDatabaseDict>();
+            // Load environment variables and JSON files into configuration for all environments
+            builder.Configuration.AddEnvironmentVariables();
+
+            if(builder.Environment.IsDevelopment())
+            {
+                // Additional configuration for Development environment
+                builder.Configuration.AddJsonFile("appsettings.Development.json");
+            }
+
+            // Rest of the database setup
+            if(builder.Environment.IsEnvironment("Testing"))
+            {
+                // Register the InMemoryToDoDatabaseDict with DI container.
+                // If you want to use a different database, register it here.
+                builder.Services.AddSingleton<IToDoDatabase, InMemoryToDoDatabaseDict>();
+            }
+            else
+            {
+                // Get connection string from the configuration
+                var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")
+                    ?? throw new InvalidOperationException("Azure SQL connection string not found");
+
+                // Use SQL database for other environments
+                builder.Services.AddDbContext<ToDoDbContext>(options =>
+                    options.UseSqlServer(connectionString));
+                builder.Services.AddScoped<IToDoDatabase, EFCoreToDoDatabase>();
+            }
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -37,11 +56,8 @@ namespace ToDoList
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
