@@ -17,7 +17,7 @@ namespace ToDoList.ToDos.Commands.Handlers
 
         public async Task<bool> Handle(PutToDoItemById request, CancellationToken cancellationToken)
         {
-            bool updated = await _database.UpdateAsync(request.Id, request.Item, cancellationToken);
+            bool updated = await _database.UpdateToDoItemAsync(request.Id, request.Item, cancellationToken);
             return updated;
         }
 

@@ -26,7 +26,10 @@ Entity Framework Core (EF Core) is an open-source, lightweight, extensible, and 
         - Rename a column/table: EF Core will attempt to preserve the data in the new structure.
         - Complex changes (like splitting a table, merging tables, changing relationships): you may need to write custom migration code. EF Core generates a baseline migration script, but it might not cover complex data transformations or preserve data as you want. In such cases, you need to modify the migration script manually to handle data appropriately.
         - Data loss risk: some changes can lead to data loss (e.g., dropping columns, tables, or changing data types). Always review migration scripts carefully and test them in a development or staging environment before applying them to your production database. Also, before applying any migration to a production database it's crucial to back up your data. 
-
+    
+        General notes on data preservation:
+        - Compatibility: make sure your datamodel is always forward and backward compatible. Consider: never delete a column, rename it to e.g. "obsolete" instead.
+        - Rollback of data: never rollback because you'll need to shutdown your system and will therefore always miss a few minutes of data (a moment without traffic does not exist). Live migrations are the modern way of doing things. 
 1. **Performance**: While EF Core may not always match the performance of raw SQL queries, it has been optimized for most common scenarios, and performance improvements are a continuous focus in its development.
 
 1. **Code-First Approach**: EF Core allows for a code-first approach, where you define your database schema in code rather than creating the database first. 

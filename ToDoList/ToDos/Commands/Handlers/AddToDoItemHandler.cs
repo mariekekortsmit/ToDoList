@@ -17,7 +17,7 @@ namespace ToDoList.ToDos.Commands.Handlers
 
         public async Task<ToDoItem> Handle(AddToDoItem request, CancellationToken cancellationToken)
         {
-            var newItem = await _database.AddAsync(request.Item, cancellationToken);
+            var newItem = await _database.AddToDoItemAsync(request.Item, cancellationToken);
             return newItem;
         }
 

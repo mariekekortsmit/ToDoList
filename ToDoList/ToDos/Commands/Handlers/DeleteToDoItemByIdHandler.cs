@@ -17,7 +17,7 @@ namespace ToDoList.ToDos.Commands.Handlers
 
         public async Task<bool> Handle(DeleteToDoItemById request, CancellationToken cancellationToken)
         {
-            bool deleted = await _database.DeleteAsync(request.Id, cancellationToken);
+            bool deleted = await _database.DeleteToDoItemAsync(request.Id, cancellationToken);
             return deleted;
         }
     }

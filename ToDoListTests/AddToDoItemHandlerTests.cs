@@ -42,7 +42,7 @@ namespace ToDoListTests
             await handler.Handle(request, CancellationToken.None);
 
             // Assert
-            var itemsInDb = await db.GetAllAsync(CancellationToken.None);
+            var itemsInDb = await db.GetAllToDoItemsAsync(CancellationToken.None);
             itemsInDb.Should().HaveCount(2);
             foreach (var item in itemsInDb)
             {
@@ -68,7 +68,7 @@ namespace ToDoListTests
             var result2 = await handler.Handle(request2, CancellationToken.None);
 
             // Assert
-            var itemsInDb =  await db.GetAllAsync(CancellationToken.None);
+            var itemsInDb =  await db.GetAllToDoItemsAsync(CancellationToken.None);
             itemsInDb.Should().HaveCount(2);
             result1.Task.Should().Be(addItemDto1.Task);
             result1.IsCompleted.Should().Be(addItemDto1.IsCompleted);
