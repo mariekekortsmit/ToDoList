@@ -99,7 +99,6 @@ namespace ToDoList.DataAccess.Implementations
         // Update an existing item.
         public async Task<bool> UpdateToDoItemAsync(Guid id, UpdateItemDto item, CancellationToken cancellationToken)
         {
-            // TODO: add person handling
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
@@ -134,7 +133,6 @@ namespace ToDoList.DataAccess.Implementations
         // Delete an item by Id.
         public async Task<bool> DeleteToDoItemAsync(Guid id, CancellationToken cancellationToken)
         {
-            // TODO: add person handling
             await _semaphore.WaitAsync(cancellationToken);
             try
             {

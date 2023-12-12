@@ -74,7 +74,7 @@ namespace ToDoList
             todoGroup.MapPost<AddToDoItem, ToDoItem>("/");
             todoGroup.MapPut<PutToDoItemById, bool>("/{Id}/");
             todoGroup.MapDelete<DeleteToDoItemById, bool>("/{Id}/");
-            todoGroup.MapGet<GetToDoItemsByPerson, List<ToDoItemDto>>("/people/{personId}/"); // TODO in ef dict and list
+            todoGroup.MapGet<GetToDoItemsByPerson, List<ToDoItemDto>>("/people/{personId}/");
 
             var personGroup = app
               .MapGroup("/people")
@@ -85,9 +85,9 @@ namespace ToDoList
             personGroup.MapPost<AddPerson, Person>("/");
             personGroup.MapPut<PutPersonById, bool>("/{Id}/");
             personGroup.MapDelete<DeletePersonById, bool>("/{Id}/");
-            personGroup.MapPost<AddPersonToToDoItem, bool>("/{personId}/todos/{itemId}"); // TODO
-            personGroup.MapDelete<DeletePersonFromToDoItem, bool>("/{personId}/todos/{itemId}"); // TODO
-            personGroup.MapGet<GetPeopleByToDoItem, List<PersonDto>>("/todos/{itemId}"); // TODO
+            personGroup.MapPost<AddPersonToToDoItem, bool>("/{personId}/todos/{itemId}");
+            personGroup.MapDelete<DeletePersonFromToDoItem, bool>("/{personId}/todos/{itemId}");
+            personGroup.MapGet<GetPeopleByToDoItem, List<PersonDto>>("/todos/{itemId}");
 
             app.Run();
         }
