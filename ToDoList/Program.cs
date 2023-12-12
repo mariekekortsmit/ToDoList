@@ -4,6 +4,8 @@ using ToDoList.DataAccess.Interfaces;
 using ToDoList.Models.Dtos;
 using ToDoList.ToDos.Queries.Requests;
 using ToDoList.ToDos.Commands.Requests;
+using ToDoList.People.Queries.Requests;
+using ToDoList.People.Commands.Requests;
 using ToDoList.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,16 +65,29 @@ namespace ToDoList
 
             app.UseAuthorization();
 
-            var group = app
+            var todoGroup = app
                .MapGroup("/todos")
                .WithTags("todos")               ;
 
-            // Use the injected IToDoDatabase service
-            group.MapGet<GetToDoItemById, ToDoItemDto?>("/{Id}/");
-            group.MapGet<GetToDoItems, List<ToDoItemDto>>("/");
-            group.MapPost<AddToDoItem, ToDoItem>("/");
-            group.MapPut<PutToDoItemById, bool>("/{Id}/");
-            group.MapDelete<DeleteToDoItemById, bool>("/{Id}/");
+            todoGroup.MapGet<GetToDoItemById, ToDoItemDto?>("/{Id}/");
+            todoGroup.MapGet<GetToDoItems, List<ToDoItemDto>>("/");
+            todoGroup.MapPost<AddToDoItem, ToDoItem>("/");
+            todoGroup.MapPut<PutToDoItemById, bool>("/{Id}/");
+            todoGroup.MapDelete<DeleteToDoItemById, bool>("/{Id}/");
+            todoGroup.MapGet<GetToDoItemsByPerson, List<ToDoItemDto>>("/people/{personId}/"); // TODO in ef dict and list
+
+            var personGroup = app
+              .MapGroup("/people")
+              .WithTags("people");
+
+            personGroup.MapGet<GetPersonById, PersonDto?>("/{Id}/");
+            personGroup.MapGet<GetPeople, List<PersonDto>>("/");
+            personGroup.MapPost<AddPerson, Person>("/");
+            personGroup.MapPut<PutPersonById, bool>("/{Id}/");
+            personGroup.MapDelete<DeletePersonById, bool>("/{Id}/");
+            personGroup.MapPost<AddPersonToToDoItem, bool>("/{personId}/todos/{itemId}"); // TODO
+            personGroup.MapDelete<DeletePersonFromToDoItem, bool>("/{personId}/todos/{itemId}"); // TODO
+            personGroup.MapGet<GetPeopleByToDoItem, List<PersonDto>>("/todos/{itemId}"); // TODO
 
             app.Run();
         }

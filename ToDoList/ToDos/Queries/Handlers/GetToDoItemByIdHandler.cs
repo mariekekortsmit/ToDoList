@@ -16,7 +16,7 @@ namespace ToDoList.ToDos.Queries.Handlers
 
         public async Task<ToDoItemDto?> Handle(GetToDoItemById request, CancellationToken cancellationToken)
         {
-            var items = await _database.GetAsync(request.Id, cancellationToken);
+            var items = await _database.GetToDoItemAsync(request.Id, cancellationToken);
             return items;
         }
     }
